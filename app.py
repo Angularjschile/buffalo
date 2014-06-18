@@ -1,40 +1,67 @@
-from flask import Flask, request, Response, render_template, \
-	session, g, redirect, url_for, abort
-from functools import wraps
+from flask import Flask, jsonify, abort, request, make_response, url_for, render_template
+from flask.ext.httpauth import HTTPBasicAuth
+import json
 
 """
+------------=------------=------------=------------=------------
 DO NOT MESS WITH THIS STUFF
+------------=------------=------------=------------=------------
 """
-# some basic http auth for now, use the @protected decorator on all public views
-def check_auth(username, password):
-    return username == 'admin' and password == 'juicy'
+# basic flask stuff
+app = Flask(__name__, static_url_path = "")
 
-def authenticate():
-    return Response(
-    'Could not verify your access level for that URL.\n'
-    'I needs them proper credentials amigo.', 401,
-    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+# some globals for the information
+API_VERSION = 1.0
+API_NAME = "buffalo"
+API_AUTHOR = "Barry Sagittarius"
 
-def protect(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-    return decorated
+
+# some wrappers around auth to redifne how it works. auth should be better, but for now \
+#   it's going to be a simple implementation. Let's revist it when it's all good to go.
+#
+# when writing new routes, just decorete them with @auth.login_required and it will check \
+#   for the basic username and password defined below.
+
+
+auth = HTTPBasicAuth()
+
+@auth.get_password
+def get_password(username):
+    if username == 'barry':
+        return 'sagittarius'
+    return None
+
+@auth.error_handler
+def unauthorized():
+    return make_response(jsonify( { 'error': 'Unauthorized access' } ), 403)
+    # doing a 403 instead of 401 to get rid of that ugly browser window infinite loop
+    # because thats just annoying as shit and i presonally don't like that.
+    
+@app.errorhandler(400)
+def not_found(error):
+    # nothing too fancy here, just making the response a json error
+    return make_response(jsonify( { 'error': 'Bad request' } ), 400)
+
+@app.errorhandler(404)
+def not_found(error):
+    # nothing too fancy here either, just making the response a json error
+    return make_response(jsonify( { 'error': 'Not found' } ), 404)
 
 """
+------------=------------=------------=------------=------------
 FEEL FREE TO MESS WITH THIS STUFF
+------------=------------=------------=------------=------------
 """
-app = Flask(__name__)
+# here is where we actually create the routes and the functions that do stuff. It is    \
+#   separated into two parts. API calls and HTML calls. This is to keep it easy to read.\
+#   try and create external files and include them later on for stuff that does heavy   \
+#   lifting. This will keep the app.py size down for readability.
 
-@app.route('/')
-@protect
-def index():
-    return render_template('index.html')
+@app.route("/api/%d/info" % API_VERSION, methods = ['GET'])
+@auth.login_required
+def api_info():
+    return jsonify( { 'version': API_VERSION } )
 
 # boot this thing
 if __name__ == '__main__':
-	app.debug = True
-	app.run()
+    app.run(debug = True)
