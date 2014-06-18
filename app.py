@@ -57,8 +57,7 @@ FEEL FREE TO MESS WITH THIS STUFF
 #   try and create external files and include them later on for stuff that does heavy   \
 #   lifting. This will keep the app.py size down for readability.
 
-@app.route("/api/%d/info" % API_VERSION, methods = ['GET'])
-@auth.login_required
+@app.route('/api/info', methods = ['GET'])
 def api_info():
     return jsonify( { 'version': API_VERSION } )
 
