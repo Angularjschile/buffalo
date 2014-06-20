@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, abort, request, make_response, url_for, render_template
 from flask.ext.httpauth import HTTPBasicAuth
+#from mongo.connection import DB
 import json
 
 """
@@ -11,7 +12,7 @@ DO NOT MESS WITH THIS STUFF
 app = Flask(__name__, static_url_path = "")
 
 # some globals for the information
-API_VERSION = 1.0
+API_VERSION = 1.1
 API_NAME = "buffalo"
 API_AUTHOR = "Barry Sagittarius"
 
@@ -59,7 +60,17 @@ FEEL FREE TO MESS WITH THIS STUFF
 
 @app.route('/api/info', methods = ['GET'])
 def api_info():
-    return jsonify( { 'version': API_VERSION } )
+    return jsonify( {
+        'name': API_NAME,
+        'version': API_VERSION,
+        'author': API_AUTHOR
+        })
+
+@app.route('/api/product/<game_id>/funnel', methods = ['GET'])
+def game_funnel():
+    return jsonify( {
+        'status': 'ok'
+        })
 
 # boot this thing
 if __name__ == '__main__':
