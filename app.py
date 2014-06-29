@@ -67,9 +67,10 @@ def api_info():
         })
 
 @app.route('/api/product/<game_id>/funnel', methods = ['GET'])
-def game_funnel():
+def game_funnel(game_id):
     return jsonify( {
-        'status': 'ok'
+        'status': 'ok',
+        'game': game_id
         })
 
 # boot this thing
