@@ -15,6 +15,7 @@ app = Flask(__name__, static_url_path = "")
 API_VERSION = 1.1
 API_NAME = "buffalo"
 API_AUTHOR = "Barry Sagittarius"
+API_IP = "162.243.154.193"
 
 
 # some wrappers around auth to redifne how it works. auth should be better, but for now \
